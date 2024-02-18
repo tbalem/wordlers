@@ -1,3 +1,6 @@
+# vscode custom settings
+.vscode
+
 # Devenv
 .devenv
 .devenv.flake.nix
