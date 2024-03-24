@@ -48,7 +48,7 @@ fn check_perfect_characters(
             if let Some(char_count) = char_counts.get_mut(&char1) {
                 *char_count -= 1;
             } else {
-                println!("Error reading char {i}: {char1} in char_counts HashMap");
+                eprintln!("Error reading char {i}: {char1} in char_counts HashMap");
                 continue;
             }
         }
@@ -77,7 +77,7 @@ fn check_misplaced_characters(
                     }
                 }
             } else {
-                println!("Error reading char {i} in trimmed_uppercased_input");
+                eprintln!("Error reading char {i} in trimmed_uppercased_input");
             }
         }
     }
@@ -116,10 +116,10 @@ fn game_loop(guess_word: &String) {
             eprintln!("Error while reading input: {}", err);
         }
         Err(UserInputError::UnexpectedLength) => {
-            eprintln!("Your guess must be exactly 5 characters.");
+            println!("Your guess must be exactly 5 characters.");
         }
         Err(UserInputError::NotAlphabetic) => {
-            eprintln!("Some of your input is not an alphabetic character.");
+            println!("Some of your input is not an alphabetic character.");
         }
     }
 }
