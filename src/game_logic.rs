@@ -1,11 +1,11 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, hash::BuildHasher};
 
 /// Checks for perfect characters in the guess word and updates the character counts.
 /// Returns a vector of characters representing the results.
-pub fn check_perfect_characters(
+pub fn check_perfect_characters<S: BuildHasher>(
     guess_word: &str,
     guess_string: &str,
-    char_counts: &mut HashMap<char, i32>,
+    char_counts: &mut HashMap<char, i32, S>,
 ) -> Vec<char> {
     let mut results = vec!['-'; guess_word.len()];
 
@@ -26,10 +26,10 @@ pub fn check_perfect_characters(
 
 /// Checks for misplaced characters in the guess word and updates the character counts.
 /// Returns a vector of characters representing the results.
-pub fn check_misplaced_characters(
+pub fn check_misplaced_characters<S: BuildHasher>(
     guess_word: &str,
     guess_string: &str,
-    mut char_counts: HashMap<char, i32>,
+    mut char_counts: HashMap<char, i32, S>,
     mut results: Vec<char>,
 ) -> Vec<char> {
     for (i, result_char_i) in results.iter_mut().enumerate() {
