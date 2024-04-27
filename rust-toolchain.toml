@@ -1,5 +1,5 @@
 [toolchain]
 channel = "nightly"
 components = ["rustc", "cargo", "clippy", "rust-std", "rustfmt"]
-targets = ["x86_64-unknown-linux-gnu"]
+targets = ["x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
 profile = "minimal"
