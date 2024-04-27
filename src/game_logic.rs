@@ -3,8 +3,8 @@ use std::collections::HashMap;
 /// Checks for perfect characters in the guess word and updates the character counts.
 /// Returns a vector of characters representing the results.
 pub fn check_perfect_characters(
-    guess_word: &String,
-    guess_string: &String,
+    guess_word: &str,
+    guess_string: &str,
     char_counts: &mut HashMap<char, i32>,
 ) -> Vec<char> {
     let mut results = vec!['-'; guess_word.len()];
@@ -27,8 +27,8 @@ pub fn check_perfect_characters(
 /// Checks for misplaced characters in the guess word and updates the character counts.
 /// Returns a vector of characters representing the results.
 pub fn check_misplaced_characters(
-    guess_word: &String,
-    guess_string: &String,
+    guess_word: &str,
+    guess_string: &str,
     mut char_counts: HashMap<char, i32>,
     mut results: Vec<char>,
 ) -> Vec<char> {
