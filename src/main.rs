@@ -6,6 +6,9 @@ fn main() {
     let guess_word = String::from("TESTS");
 
     loop {
-        game_loop(&guess_word);
+        match game_loop(&guess_word) {
+            Ok(results) => println!("{}", results.into_iter().collect::<String>()),
+            Err(err) => eprint!("{err}"),
+        }
     }
 }
