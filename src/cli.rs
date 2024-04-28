@@ -24,6 +24,36 @@ impl fmt::Display for GuessIterationError {
     }
 }
 
+/// Gives at most `n_tries` to the user to guess the `guess_word`.
+/// Also prints previous attempts' result.
+///
+/// # Returns
+/// True if the user guessed the word, false otherwise.
+#[must_use]
+pub fn game_iteration(guess_word: &str, n_tries: usize) -> bool {
+    let mut guess_tries: Vec<Vec<char>> =
+        (0..n_tries).map(|_| vec!['-'; guess_word.len()]).collect();
+    for i in 0..n_tries {
+        match guess_iteration(guess_word) {
+            Ok(result) => {
+                guess_tries[i] = result;
+                println!("Current tries:");
+                for guess_try in &guess_tries {
+                    println!("{}", guess_try.iter().collect::<String>());
+                }
+                if guess_tries[i].iter().all(|c| c == &'X') {
+                    return true;
+                }
+            }
+            Err(err) => {
+                eprintln!("{err}");
+                break;
+            }
+        }
+    }
+    false
+}
+
 /// Takes user input, checks for perfect and misplaced characters.
 /// # Returns
 /// The result char array produced by `check_perfect_characters` and `check_misplaced_characters`.
@@ -31,7 +61,7 @@ impl fmt::Display for GuessIterationError {
 /// # Errors
 /// Throw `GuessIterationError::TooManyIOErrorIteration` if there where more then `MAX_IOERROR_TRIES` tries
 /// with error while reading user's input.
-pub fn game_loop(guess_word: &str) -> Result<Vec<char>, Box<dyn Error>> {
+pub fn guess_iteration(guess_word: &str) -> Result<Vec<char>, Box<dyn Error>> {
     let char_counts = guess_word.chars().fold(HashMap::new(), |mut acc, c| {
         *acc.entry(c).or_insert(0) += 1;
         acc
