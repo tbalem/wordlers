@@ -41,7 +41,7 @@ pub fn game_iteration(guess_word: &str, n_tries: usize) -> bool {
                 for guess_try in &guess_tries {
                     println!("{}", guess_try.iter().collect::<String>());
                 }
-                if guess_tries[i].iter().all(|c| c == &'X') {
+                if guess_tries[i].iter().all(|c| *c == 'X') {
                     return true;
                 }
             }
