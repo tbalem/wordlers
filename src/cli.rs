@@ -1,7 +1,7 @@
 use core::fmt;
 use std::collections::HashMap;
 use std::error::Error;
-use wordlers::game_logic::{check_misplaced_characters, check_perfect_characters};
+use wordlers::game_logic::{mark_misplaced_characters, mark_perfect_characters};
 use wordlers::input::{format_and_check::input_string, get_user_input_stdin};
 
 const MAX_IOERROR_TRIES: usize = 5;
@@ -75,13 +75,13 @@ pub fn guess_iteration(guess_word: &str) -> Result<Vec<char>, Box<dyn Error>> {
         match get_user_input_stdin() {
             Ok(user_input_str) => match input_string(&user_input_str, guess_word.len()) {
                 Ok(trimmed_uppercased_input) => {
-                    let results_with_perfect_characters = check_perfect_characters(
+                    let results_with_perfect_characters = mark_perfect_characters(
                         guess_word,
                         &trimmed_uppercased_input,
                         &mut edited_char_counts,
                     );
 
-                    let results = check_misplaced_characters(
+                    let results = mark_misplaced_characters(
                         guess_word,
                         &trimmed_uppercased_input,
                         edited_char_counts,
