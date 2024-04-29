@@ -1,6 +1,6 @@
 use core::fmt;
 use std::error::Error;
-use wordlers::game_logic::analyze_guess;
+use wordlers::game_logic::{analyze_guess, CharacterState};
 use wordlers::input::{format_and_check::input_string, get_user_input_stdin};
 
 const MAX_IOERROR_TRIES: usize = 5;
@@ -30,17 +30,28 @@ impl fmt::Display for GuessIterationError {
 /// True if the user guessed the word, false otherwise.
 #[must_use]
 pub fn game_iteration(guess_word: &str, n_tries: usize) -> bool {
-    let mut guess_tries: Vec<Vec<char>> =
-        (0..n_tries).map(|_| vec!['-'; guess_word.len()]).collect();
+    let mut guess_tries: Vec<Vec<CharacterState>> = (0..n_tries)
+        .map(|_| vec![CharacterState::Undefined; guess_word.len()])
+        .collect();
     for i in 0..n_tries {
         match guess_iteration(guess_word) {
             Ok(result) => {
                 guess_tries[i] = result;
                 println!("Current tries:");
                 for guess_try in &guess_tries {
-                    println!("{}", guess_try.iter().collect::<String>());
+                    println!(
+                        "{}",
+                        guess_try
+                            .iter()
+                            .map(|character_state| match character_state {
+                                CharacterState::Good => 'X',
+                                CharacterState::Misplaced => 'O',
+                                CharacterState::Undefined => '-',
+                            })
+                            .collect::<String>()
+                    );
                 }
-                if guess_tries[i].iter().all(|c| *c == 'X') {
+                if guess_tries[i].iter().all(|c| *c == CharacterState::Good) {
                     return true;
                 }
             }
@@ -60,7 +71,7 @@ pub fn game_iteration(guess_word: &str, n_tries: usize) -> bool {
 /// # Errors
 /// Throw `GuessIterationError::TooManyIOErrorIteration` if there where more then `MAX_IOERROR_TRIES` tries
 /// with error while reading user's input.
-pub fn guess_iteration(guess_word: &str) -> Result<Vec<char>, Box<dyn Error>> {
+pub fn guess_iteration(guess_word: &str) -> Result<Vec<CharacterState>, Box<dyn Error>> {
     let mut nb_incorrect_tries = 0;
     while nb_incorrect_tries < MAX_IOERROR_TRIES {
         println!("Please input a new guess:");
