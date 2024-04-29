@@ -4,7 +4,7 @@ use std::{collections::HashMap, hash::BuildHasher};
 ///
 /// # Returns
 /// A vector of characters representing the results.
-pub fn mark_perfect_characters<S: BuildHasher>(
+fn mark_perfect_characters<S: BuildHasher>(
     guess_word: &str,
     guess_string: &str,
     char_counts: &mut HashMap<char, i32, S>,
@@ -30,7 +30,7 @@ pub fn mark_perfect_characters<S: BuildHasher>(
 ///
 /// # Returns
 /// A vector of characters representing the results.
-pub fn mark_misplaced_characters<S: BuildHasher>(
+fn mark_misplaced_characters<S: BuildHasher>(
     guess_word: &str,
     guess_string: &str,
     mut char_counts: HashMap<char, i32, S>,
@@ -54,4 +54,17 @@ pub fn mark_misplaced_characters<S: BuildHasher>(
     }
 
     results
+}
+
+#[must_use]
+pub fn analyze_guess(guess_word: &str, preprocessed_try: &str) -> Vec<char> {
+    let mut char_counts = guess_word.chars().fold(HashMap::new(), |mut acc, c| {
+        *acc.entry(c).or_insert(0) += 1;
+        acc
+    });
+
+    // Temporary result with perfectly placed characters
+    let results = mark_perfect_characters(guess_word, preprocessed_try, &mut char_counts);
+
+    mark_misplaced_characters(guess_word, preprocessed_try, char_counts, results)
 }

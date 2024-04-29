@@ -1,7 +1,6 @@
 use core::fmt;
-use std::collections::HashMap;
 use std::error::Error;
-use wordlers::game_logic::{mark_misplaced_characters, mark_perfect_characters};
+use wordlers::game_logic::analyze_guess;
 use wordlers::input::{format_and_check::input_string, get_user_input_stdin};
 
 const MAX_IOERROR_TRIES: usize = 5;
@@ -62,33 +61,13 @@ pub fn game_iteration(guess_word: &str, n_tries: usize) -> bool {
 /// Throw `GuessIterationError::TooManyIOErrorIteration` if there where more then `MAX_IOERROR_TRIES` tries
 /// with error while reading user's input.
 pub fn guess_iteration(guess_word: &str) -> Result<Vec<char>, Box<dyn Error>> {
-    let char_counts = guess_word.chars().fold(HashMap::new(), |mut acc, c| {
-        *acc.entry(c).or_insert(0) += 1;
-        acc
-    });
-
-    let mut edited_char_counts = char_counts.clone();
-
     let mut nb_incorrect_tries = 0;
     while nb_incorrect_tries < MAX_IOERROR_TRIES {
         println!("Please input a new guess:");
         match get_user_input_stdin() {
             Ok(user_input_str) => match input_string(&user_input_str, guess_word.len()) {
                 Ok(trimmed_uppercased_input) => {
-                    let results_with_perfect_characters = mark_perfect_characters(
-                        guess_word,
-                        &trimmed_uppercased_input,
-                        &mut edited_char_counts,
-                    );
-
-                    let results = mark_misplaced_characters(
-                        guess_word,
-                        &trimmed_uppercased_input,
-                        edited_char_counts,
-                        results_with_perfect_characters,
-                    );
-
-                    return Ok(results);
+                    return Ok(analyze_guess(guess_word, &trimmed_uppercased_input));
                 }
                 Err(err) => eprintln!("{err}"),
             },
