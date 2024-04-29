@@ -2,8 +2,20 @@ use std::{collections::HashMap, hash::BuildHasher};
 
 /// Checks for perfect characters in the guess word and updates the character counts.
 ///
+/// This function compares each character in the `guess_word` with the corresponding character in the `guess_string`.
+/// If a character in the `guess_word` matches the character in the `guess_string`, it is marked as `'X'` in the `results` vector.
+/// The character count for the matched character is then decremented in the `char_counts` `HashMap`.
+///
+/// # Arguments
+///
+/// * `guess_word` - The word to be guessed.
+/// * `guess_string` - The user's guess.
+/// * `char_counts` - A mutable reference to a `HashMap` that stores the character counts.
+///
 /// # Returns
-/// A vector of characters representing the results.
+///
+/// A vector of characters representing the results. Each character in the vector represents the status of a character in the `guess_word`.
+/// If a character is perfectly placed, it is represented by `'X'`. Otherwise, it is represented by `'-'`.
 fn mark_perfect_characters<S: BuildHasher>(
     guess_word: &str,
     guess_string: &str,
@@ -28,8 +40,22 @@ fn mark_perfect_characters<S: BuildHasher>(
 
 /// Checks for misplaced characters in the guess word and updates the character counts.
 ///
+/// This function iterates over each character in the `results` vector.
+/// If a character is not already marked as `'X'`, it checks if the corresponding character in the `guess_string` is present in the `guess_word`.
+/// If it is present and the character count for that character is greater than 0, it marks the character as `'O'` in the `results` vector.
+/// The character count for the matched character is then decremented in the `char_counts` `HashMap`.
+///
+/// # Arguments
+///
+/// * `guess_word` - The word to be guessed.
+/// * `guess_string` - The user's guess.
+/// * `char_counts` - A `HashMap` that stores the character counts.
+/// * `results` - A vector representing the current status of the characters in the `guess_word`.
+///
 /// # Returns
-/// A vector of characters representing the results.
+///
+/// A vector of characters representing the results. Each character in the vector represents the status of a character in the `guess_word`.
+/// If a character is perfectly placed, it is represented by `'X'`. If a character is misplaced, it is represented by `'O'`. Otherwise, it is represented by `'-'`.
 fn mark_misplaced_characters<S: BuildHasher>(
     guess_word: &str,
     guess_string: &str,
@@ -56,6 +82,26 @@ fn mark_misplaced_characters<S: BuildHasher>(
     results
 }
 
+/// Analyzes the user's guess and returns the results.
+///
+/// This function takes the `guess_word` and the preprocessed user's guess (`preprocessed_try`) as input.
+/// By preprocessed, it is meant to be trimmed.
+/// It initializes a `HashMap` (`char_counts`) to store the character counts in the `guess_word`.
+/// The `mark_perfect_characters` function is called to check for perfect characters and update the character counts.
+/// The `mark_misplaced_characters` function is then called to check for misplaced characters and update the character counts.
+///
+/// # Arguments
+///
+/// * `guess_word` - The word to be guessed.
+/// * `preprocessed_try` - The preprocessed user's guess.
+///
+/// # Returns
+///
+/// A vector of characters representing the results. Each character in the vector represents the status of a character in the `guess_word`.
+/// If a character:
+/// - is perfectly placed, it is represented by `'X'`.
+/// - is misplaced, it is represented by `'O'`.
+/// - Otherwise, it is represented by `'-'`.
 #[must_use]
 pub fn analyze_guess(guess_word: &str, preprocessed_try: &str) -> Vec<char> {
     let mut char_counts = guess_word.chars().fold(HashMap::new(), |mut acc, c| {
