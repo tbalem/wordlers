@@ -1,7 +1,7 @@
 use core::fmt;
 use std::error::Error;
 use wordlers::game_logic::{analyze_guess, CharacterState};
-use wordlers::input::{format_and_check::input_string, get_user_input_stdin};
+use wordlers::user_input::{format_and_check::input_string, get_user_input_stdin};
 
 const MAX_IOERROR_TRIES: usize = 5;
 

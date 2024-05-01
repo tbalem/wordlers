@@ -1,2 +1,2 @@
 pub mod game_logic;
-pub mod input;
+pub mod user_input;
