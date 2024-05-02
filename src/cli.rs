@@ -27,16 +27,18 @@ impl fmt::Display for GuessIterationError {
 
 #[derive(Clone)]
 struct DisplayedCharacterState {
-    character: String,
     character_state: CharacterState,
 }
 
 impl fmt::Display for DisplayedCharacterState {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.character_state {
-            CharacterState::Undefined => write!(f, "{}", self.character),
-            CharacterState::Misplaced => write!(f, "{}", self.character.yellow()),
-            CharacterState::Good => write!(f, "{}", self.character.green()),
+            CharacterState::NotTried => write!(f, "-"),
+            CharacterState::NotPresent(character) => write!(f, "{}", String::from(character).red()),
+            CharacterState::Misplaced(character) => {
+                write!(f, "{}", String::from(character).yellow())
+            }
+            CharacterState::Good(character) => write!(f, "{}", String::from(character).green()),
         }
     }
 }
@@ -52,8 +54,7 @@ pub fn game_iteration(guess_word: &str, n_tries: usize) -> bool {
         .map(|_| {
             vec![
                 DisplayedCharacterState {
-                    character: String::from("-"),
-                    character_state: CharacterState::Undefined
+                    character_state: CharacterState::NotTried
                 };
                 guess_word.len()
             ]
@@ -70,10 +71,10 @@ pub fn game_iteration(guess_word: &str, n_tries: usize) -> bool {
                     }
                     println!();
                 }
-                if guess_tries[i]
-                    .iter()
-                    .all(|c| c.character_state == CharacterState::Good)
-                {
+                if guess_tries[i].iter().all(|c| {
+                    std::mem::discriminant(&c.character_state)
+                        == std::mem::discriminant(&CharacterState::Good(' '))
+                }) {
                     return true;
                 }
             }
@@ -102,9 +103,7 @@ fn guess_iteration(guess_word: &str) -> Result<Vec<DisplayedCharacterState>, Box
                 Ok(trimmed_uppercased_input) => {
                     return Ok(analyze_guess(guess_word, &trimmed_uppercased_input)
                         .into_iter()
-                        .zip(trimmed_uppercased_input.chars())
-                        .map(|(character_state, character)| DisplayedCharacterState {
-                            character: String::from(character),
+                        .map(|character_state| DisplayedCharacterState {
                             character_state: character_state.clone(),
                         })
                         .collect());

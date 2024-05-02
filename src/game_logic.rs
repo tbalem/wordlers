@@ -3,9 +3,10 @@ use std::{collections::HashMap, hash::BuildHasher};
 /// Represents the state of a character in the guess word.
 #[derive(Clone, PartialEq)]
 pub enum CharacterState {
-    Undefined,
-    Misplaced,
-    Good,
+    NotTried,
+    NotPresent(char),
+    Misplaced(char),
+    Good(char),
 }
 
 /// Checks for perfect characters in the guess word and updates the character counts.
@@ -28,11 +29,11 @@ fn mark_perfect_characters<S: BuildHasher>(
     guess_string: &str,
     char_counts: &mut HashMap<char, i32, S>,
 ) -> Vec<CharacterState> {
-    let mut results = vec![CharacterState::Undefined; guess_word.len()];
+    let mut results = vec![CharacterState::NotTried; guess_word.len()];
 
     for (i, (char1, char2)) in guess_word.chars().zip(guess_string.chars()).enumerate() {
         if char1 == char2 {
-            results[i] = CharacterState::Good;
+            results[i] = CharacterState::Good(char1);
             if let Some(char_count) = char_counts.get_mut(&char1) {
                 *char_count -= 1;
             } else {
@@ -72,15 +73,21 @@ fn mark_misplaced_characters<S: BuildHasher>(
     mut results: Vec<CharacterState>,
 ) -> Vec<CharacterState> {
     for (i, result_char_i) in results.iter_mut().enumerate() {
-        if *result_char_i != CharacterState::Good {
+        if std::mem::discriminant(result_char_i)
+            != std::mem::discriminant(&CharacterState::Good(' '))
+        {
             if let Some(input_char) = guess_string.chars().nth(i) {
                 if guess_word.contains(input_char) {
                     if let Some(char_count) = char_counts.get_mut(&input_char) {
                         if *char_count > 0 {
-                            *result_char_i = CharacterState::Misplaced;
+                            *result_char_i = CharacterState::Misplaced(input_char);
                             *char_count -= 1;
+                        } else {
+                            *result_char_i = CharacterState::NotPresent(input_char);
                         }
                     }
+                } else {
+                    *result_char_i = CharacterState::NotPresent(input_char);
                 }
             } else {
                 eprintln!("Error reading char {i} in trimmed_uppercased_input");
