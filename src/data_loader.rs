@@ -1,6 +1,6 @@
 use core::fmt;
 use rand::seq::SliceRandom;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 use std::hash::BuildHasher;
@@ -31,9 +31,9 @@ impl Display for DataLoaderError {
 /// # Errors
 pub fn load_words_file(
     data_file_path: &str,
-) -> Result<HashMap<usize, Vec<String>>, Box<dyn Error>> {
+) -> Result<HashMap<usize, HashSet<String>>, Box<dyn Error>> {
     let raw_file = std::fs::read_to_string(data_file_path)?;
-    let lines_with_len: Result<Vec<(usize, String)>, Box<DataLoaderError>> = raw_file
+    let lines_with_len: Result<HashSet<(usize, String)>, Box<DataLoaderError>> = raw_file
         .lines()
         .map(|line| {
             if line.chars().all(char::is_alphabetic) {
@@ -51,7 +51,7 @@ pub fn load_words_file(
             Ok(lines_with_len
                 .into_iter()
                 .fold(HashMap::new(), |mut acc, (len, line)| {
-                    acc.entry(len).or_default().push(line);
+                    acc.entry(len).or_default().insert(line);
                     acc
                 }))
         }
@@ -61,14 +61,16 @@ pub fn load_words_file(
 
 /// # Errors
 pub fn choose_random_word<S: BuildHasher>(
-    word_hashmap: &HashMap<usize, Vec<String>, S>,
+    word_hashmap: &HashMap<usize, HashSet<String, S>, S>,
     word_length: usize,
 ) -> Result<String, Box<dyn Error>> {
     match word_hashmap.get(&word_length) {
         None => Err(Box::new(DataLoaderError::NoWordThisLength(word_length))),
-        Some(words_vec) => match words_vec[..].choose(&mut rand::thread_rng()) {
-            None => Err(Box::new(DataLoaderError::EmptyWordVec(word_length))),
-            Some(word) => Ok(word.clone()),
-        },
+        Some(words_set) => {
+            match words_set.iter().collect::<Vec<&String>>()[..].choose(&mut rand::thread_rng()) {
+                None => Err(Box::new(DataLoaderError::EmptyWordVec(word_length))),
+                Some(word) => Ok((*word).clone()),
+            }
+        }
     }
 }
