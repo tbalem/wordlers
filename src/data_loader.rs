@@ -1,13 +1,12 @@
 use core::fmt;
 use rand::seq::SliceRandom;
 use std::collections::{HashMap, HashSet};
-use std::error::Error;
 use std::fmt::{Display, Formatter};
 use std::hash::BuildHasher;
 
 /// Custom error type for data loading errors.
 #[derive(Debug)]
-enum DataLoaderError {
+pub enum Error {
     /// Error indicating that a file contains non-alphabetic characters.
     NotAlphabetic(String),
     /// Error indicating that no word of a specific length was found.
@@ -16,16 +15,16 @@ enum DataLoaderError {
     EmptyWordVec(usize),
 }
 
-impl Error for DataLoaderError {}
+impl std::error::Error for Error {}
 
-impl Display for DataLoaderError {
+impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            DataLoaderError::NotAlphabetic(path) => write!(f, "File {path}."),
-            DataLoaderError::NoWordThisLength(word_size) => {
+            Error::NotAlphabetic(path) => write!(f, "File {path}."),
+            Error::NoWordThisLength(word_size) => {
                 write!(f, "No word of length {word_size} found.")
             }
-            DataLoaderError::EmptyWordVec(word_size) => {
+            Error::EmptyWordVec(word_size) => {
                 write!(f, "Vector is empty for length {word_size}.")
             }
         }
@@ -44,21 +43,19 @@ impl Display for DataLoaderError {
 ///
 /// # Errors
 ///
-/// - `DataLoaderError` if the file contains non-alphabetic characters.
+/// - `wordlers::data_loader::Error` if the file contains non-alphabetic characters.
 /// - `std::io::Error` if the file cannot be read.
 pub fn load_words_file(
     data_file_path: &str,
-) -> Result<HashMap<usize, HashSet<String>>, Box<dyn Error>> {
+) -> Result<HashMap<usize, HashSet<String>>, Box<dyn std::error::Error>> {
     let raw_file = std::fs::read_to_string(data_file_path)?;
-    let lines_with_len: Result<HashSet<(usize, String)>, Box<DataLoaderError>> = raw_file
+    let lines_with_len: Result<HashSet<(usize, String)>, Box<Error>> = raw_file
         .lines()
         .map(|line| {
             if line.chars().all(char::is_alphabetic) {
                 Ok((line.len(), line.to_uppercase()))
             } else {
-                Err(Box::new(DataLoaderError::NotAlphabetic(String::from(
-                    data_file_path,
-                ))))
+                Err(Box::new(Error::NotAlphabetic(String::from(data_file_path))))
             }
         })
         .collect();
@@ -90,17 +87,17 @@ pub fn load_words_file(
 ///
 /// # Errors
 ///
-/// - `DataLoaderError::NoWordThisLength` if no word of the specified length is found.
-/// - `DataLoaderError::EmptyWordVec` if the vector of words is empty.
+/// - `wordlers::data_loader::Error::NoWordThisLength` if no word of the specified length is found.
+/// - `wordlers::data_loader::Error::EmptyWordVec` if the vector of words is empty.
 pub fn choose_random_word<S: BuildHasher>(
     word_hashmap: &HashMap<usize, HashSet<String, S>, S>,
     word_length: usize,
-) -> Result<String, Box<dyn Error>> {
+) -> Result<String, Error> {
     match word_hashmap.get(&word_length) {
-        None => Err(Box::new(DataLoaderError::NoWordThisLength(word_length))),
+        None => Err(Error::NoWordThisLength(word_length)),
         Some(words_set) => {
             match words_set.iter().collect::<Vec<&String>>()[..].choose(&mut rand::thread_rng()) {
-                None => Err(Box::new(DataLoaderError::EmptyWordVec(word_length))),
+                None => Err(Error::EmptyWordVec(word_length)),
                 Some(word) => Ok((*word).clone()),
             }
         }
