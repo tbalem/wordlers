@@ -9,7 +9,7 @@ const MAX_IOERROR_TRIES: usize = 5;
 /// Represents the possible errors that can occur during a guess iteration.
 #[derive(Debug)]
 pub enum GuessIterationError {
-    // There have been too many IOError (defined by MAX_IOERROR_TRIES)
+    /// There have been too many `IOError` (defined by `MAX_IOERROR_TRIES`) while reading user input.
     TooManyIOErrorIteration,
 }
 

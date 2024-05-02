@@ -28,7 +28,9 @@ impl fmt::Display for UserInputError {
 
 /// Formats and checks the input string for validity.
 /// Returns the formatted string if it is valid, or an error otherwise.
+///
 /// # Errors
+///
 /// Returns an error if the input string is not the expected length or contains non-alphabetic characters.
 pub fn input_string(input_str: &str, expected_length: usize) -> Result<String, UserInputError> {
     let trimmed_input_str = input_str.trim();

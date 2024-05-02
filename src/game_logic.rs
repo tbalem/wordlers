@@ -3,16 +3,20 @@ use std::{collections::HashMap, hash::BuildHasher};
 /// Represents the state of a character in the guess word.
 #[derive(Clone, PartialEq)]
 pub enum CharacterState {
+    /// The character has not been tried yet.
     NotTried,
+    /// The character is not in the word.
     NotPresent(char),
+    /// The character is in the word but not at this place.
     Misplaced(char),
+    /// The character is correctly placed.
     Good(char),
 }
 
 /// Checks for perfect characters in the guess word and updates the character counts.
 ///
 /// This function compares each character in the `guess_word` with the corresponding character in the `guess_string`:
-/// If a character in the `guess_word` matches the character in the `guess_string`, it is marked as `CharacterState::Good` in the `results` vector.
+/// If a character in the `guess_word` matches the character in the `guess_string`, it is marked as `CharacterState::Good` and stored in the `results` vector.
 /// The character count for the matched character is then decremented in the `char_counts` `HashMap`.
 ///
 /// # Arguments
@@ -65,7 +69,7 @@ fn mark_perfect_characters<S: BuildHasher>(
 /// A vector of `CharacterState` representing the results:
 /// - if a character is perfectly placed, it is represented by `CharacterState::Good`.
 /// - if a character is misplaced, it is represented by `CharacterState::Misplaced`.
-/// - otherwise, it is represented by `CharacterState::Undefined`.
+/// - otherwise, it is represented by `CharacterState::NotPresent`.
 fn mark_misplaced_characters<S: BuildHasher>(
     guess_word: &str,
     guess_string: &str,
@@ -113,11 +117,11 @@ fn mark_misplaced_characters<S: BuildHasher>(
 ///
 /// # Returns
 ///
-/// A vector of characters representing the results. Each character in the vector represents the status of a character in the `guess_word`.
-/// If a character:
-/// - is perfectly placed, it is represented by `'X'`.
-/// - is misplaced, it is represented by `'O'`.
-/// - Otherwise, it is represented by `'-'`.
+/// A vector of characters representing the results. Each character is marked as:
+/// - `CharacterState::Good` if the character is perfectly placed.
+/// - `CharacterState::Misplaced` if the character is misplaced.
+/// - `CharacterState::NotPresent` if the character is not present in the `guess_word`.
+/// - `CharacterState::NotTried` if the character has not been tried yet. There should be no `CharacterState::NotTried` characters in the final result.
 #[must_use]
 pub fn analyze_guess(guess_word: &str, preprocessed_try: &str) -> Vec<CharacterState> {
     let mut char_counts = guess_word.chars().fold(HashMap::new(), |mut acc, c| {
