@@ -6,8 +6,8 @@ pub mod format_and_check;
 /// # Errors
 /// Returns an error if the input cannot be read
 /// # Examples
-/// ```
-/// use wordlers::input::get_user_input_stdin;
+/// ```no_run
+/// use wordlers::user_input::get_user_input_stdin;
 ///
 /// let user_input = get_user_input_stdin().unwrap();
 /// ```
